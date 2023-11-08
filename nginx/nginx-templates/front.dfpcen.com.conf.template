@@ -1,0 +1,74 @@
+# front.dfpcen.com.conf.template 파일
+
+
+upstream demo1-container {
+#  server 52.78.194.133:8081;
+  server 127.0.0.1:8081;
+
+}
+upstream demo2-container {
+#  server 52.78.194.133:8082;
+  server 127.0.0.1:8082;
+}
+
+
+
+server {
+  listen 80;
+  server_name  front.dfpcen.com;
+  access_log  /var/log/nginx/service.dfpcen.com.access.log  main;
+
+
+
+
+  location / {
+    proxy_pass http://demo1-container;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $host;
+    proxy_redirect off;
+  }
+
+
+
+  location /demo1/ {
+#    return 301 http://dweb.dfpcen.com;
+    rewrite ^/demo1/(.*)$ /$1 break;
+#    proxy_pass  http://front.dfpcen.com:8081;
+    proxy_pass http://demo1-container;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $host;
+    proxy_redirect off;
+
+
+#    proxy_buffer_size          128k;
+#    proxy_buffers              4 256k;
+#    proxy_busy_buffers_size    256k;
+
+
+    access_log  /var/log/nginx/service.dfpcen.com.demo1.access.log main;
+    error_log /var/log/nginx/service.dfpcen.com.demo1.error.log debug;
+
+  }
+
+
+
+
+  location /demo2/ {
+    rewrite ^/demo2/(.*)$ /$1 break;
+    proxy_pass http://demo2-container;
+#    proxy_pass http://front.dfpcen.com:8082;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $host;
+    proxy_redirect off;
+
+#    proxy_buffer_size          128k;
+#    proxy_buffers              4 256k;
+#    proxy_busy_buffers_size    256k;
+
+     access_log  /var/log/nginx/service.dfpcen.com.demo2.access.log main;
+     error_log /var/log/nginx/service.dfpcen.com.demo2.error.log debug;
+  }
+
+}
+
+
